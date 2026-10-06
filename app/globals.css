@@ -1,26 +1,984 @@
 @import "tailwindcss";
 
+/* ==========================================================================
+   NEO-BRUTALISM DESIGN SYSTEM TOKENS
+   ========================================================================== */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* High-Saturation Palette */
+  --neo-bg: #fffdf5;          /* Warm Cream Canvas */
+  --neo-ink: #000000;         /* Pure Black */
+  --neo-accent: #ff6b6b;      /* Hot Red (Primary Action) */
+  --neo-secondary: #ffd93d;   /* Vivid Yellow (Highlight / Tape) */
+  --neo-muted: #c4b5fd;       /* Soft Violet (Tertiary) */
+  --neo-card: #ffffff;        /* Crisp White Panels */
+  --neo-green: #22c55e;       /* Electric Green (Seeders) */
+  --neo-blue: #38bdf8;        /* Sky Blue */
+
+  /* Borders & Shadows */
+  --neo-border-thick: 4px solid #000000;
+  --neo-border-heavy: 6px solid #000000;
+  --neo-border-massive: 8px solid #000000;
+
+  --neo-shadow-sm: 4px 4px 0px 0px #000000;
+  --neo-shadow-md: 8px 8px 0px 0px #000000;
+  --neo-shadow-lg: 12px 12px 0px 0px #000000;
+  --neo-shadow-xl: 16px 16px 0px 0px #000000;
+
+  --font-family: var(--font-space-grotesk), "Space Grotesk", system-ui, sans-serif;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-neo-bg: var(--neo-bg);
+  --color-neo-ink: var(--neo-ink);
+  --color-neo-accent: var(--neo-accent);
+  --color-neo-secondary: var(--neo-secondary);
+  --color-neo-muted: var(--neo-muted);
+  --color-neo-card: var(--neo-card);
+  --color-neo-green: var(--neo-green);
+  --color-neo-blue: var(--neo-blue);
+  --font-sans: var(--font-family);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ==========================================================================
+   BASE & RESET
+   ========================================================================== */
+* {
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--neo-bg);
+  color: var(--neo-ink);
+  font-family: var(--font-family);
+  font-weight: 700;
+  min-height: 100vh;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  /* Graph Paper Grid Texture */
+  background-size: 32px 32px;
+  background-image:
+    linear-gradient(to right, rgba(0, 0, 0, 0.08) 1.5px, transparent 1.5px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.08) 1.5px, transparent 1.5px);
+}
+
+/* ==========================================================================
+   MARQUEE TICKER TAPE
+   ========================================================================== */
+.neo-marquee-wrap {
+  background-color: var(--neo-secondary);
+  border-bottom: var(--neo-border-thick);
+  overflow: hidden;
+  white-space: nowrap;
+  padding: 0.45rem 0;
+  font-size: 0.85rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  display: flex;
+  user-select: none;
+}
+
+.neo-marquee-inner {
+  display: inline-flex;
+  animation: marquee 25s linear infinite;
+  gap: 2rem;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ==========================================================================
+   LAYOUT CONTAINERS
+   ========================================================================== */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ==========================================================================
+   HEADER
+   ========================================================================== */
+.app-header {
+  padding: 3rem 1.5rem 2rem;
+  border-bottom: var(--neo-border-thick);
+  background-color: var(--neo-card);
+  position: relative;
+}
+
+.header-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.brand-sticker-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  background-color: var(--neo-secondary);
+  border: var(--neo-border-thick);
+  box-shadow: var(--neo-shadow-md);
+  padding: 0.6rem 1.4rem;
+  transform: rotate(-1.5deg);
+  transition: transform 0.15s ease;
+}
+
+.brand-badge:hover {
+  transform: rotate(0deg) scale(1.02);
+}
+
+.logo-text {
+  font-size: 2.5rem;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
+  margin: 0;
+  line-height: 1;
+}
+
+.sub-tag-sticker {
+  display: inline-block;
+  background-color: var(--neo-accent);
+  color: #ffffff;
+  border: var(--neo-border-thick);
+  box-shadow: var(--neo-shadow-sm);
+  padding: 0.35rem 0.85rem;
+  font-size: 0.75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  transform: rotate(2deg);
+}
+
+.tagline {
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background-color: var(--neo-muted);
+  border: var(--neo-border-thick);
+  box-shadow: var(--neo-shadow-sm);
+  padding: 0.4rem 1.25rem;
+  margin: 0.5rem 0 0;
+  text-align: center;
+}
+
+/* ==========================================================================
+   SEARCH & FILTERS SECTION
+   ========================================================================== */
+.search-section {
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 2.5rem 1.5rem 1.5rem;
+}
+
+.search-form {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.search-input-wrap {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon-box {
+  position: absolute;
+  left: 14px;
+  color: var(--neo-ink);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+
+.search-input {
+  width: 100%;
+  height: 3.75rem;
+  padding: 0 3.25rem 0 3.5rem;
+  background-color: var(--neo-card);
+  border: var(--neo-border-thick);
+  box-shadow: var(--neo-shadow-md);
+  font-family: var(--font-family);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--neo-ink);
+  outline: none;
+  border-radius: 0;
+  transition: all 0.15s ease;
+}
+
+.search-input::placeholder {
+  color: rgba(0, 0, 0, 0.45);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 1.05rem;
+}
+
+.search-input:focus {
+  background-color: var(--neo-secondary);
+  box-shadow: var(--neo-shadow-lg);
+  transform: translate(-2px, -2px);
+}
+
+.search-clear {
+  position: absolute;
+  right: 12px;
+  width: 2.25rem;
+  height: 2.25rem;
+  background-color: var(--neo-ink);
+  color: #ffffff;
+  border: 2px solid var(--neo-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 2px 2px 0px #000;
+}
+
+.search-clear:active {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+
+.search-button {
+  height: 3.75rem;
+  padding: 0 2rem;
+  background-color: var(--neo-accent);
+  color: #ffffff;
+  border: var(--neo-border-thick);
+  box-shadow: var(--neo-shadow-md);
+  font-family: var(--font-family);
+  font-size: 1.15rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 0;
+  transition: all 0.1s ease;
+  user-select: none;
+}
+
+.search-button:hover:not(:disabled) {
+  background-color: #ff5252;
+  transform: translate(-2px, -2px);
+  box-shadow: var(--neo-shadow-lg);
+}
+
+.search-button:active:not(:disabled) {
+  transform: translate(4px, 4px);
+  box-shadow: none;
+}
+
+.search-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Filters */
+.filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1rem;
+  background-color: var(--neo-card);
+  border: var(--neo-border-thick);
+  box-shadow: var(--neo-shadow-sm);
+  padding: 1.25rem;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1;
+  min-width: 180px;
+}
+
+.filter-group label {
+  font-size: 0.8rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.neo-select {
+  height: 2.75rem;
+  padding: 0 1rem;
+  background-color: var(--neo-bg);
+  border: 3px solid #000000;
+  box-shadow: 3px 3px 0px #000000;
+  font-family: var(--font-family);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--neo-ink);
+  outline: none;
+  cursor: pointer;
+  border-radius: 0;
+}
+
+.neo-select:focus {
+  background-color: var(--neo-secondary);
+}
+
+.clear-filters-btn {
+  height: 2.75rem;
+  padding: 0 1.25rem;
+  background-color: #ffffff;
+  color: var(--neo-ink);
+  border: 3px solid #000000;
+  box-shadow: 3px 3px 0px #000000;
+  font-family: var(--font-family);
+  font-size: 0.85rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  border-radius: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.clear-filters-btn:hover {
+  background-color: var(--neo-accent);
+  color: #ffffff;
+}
+
+.clear-filters-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+
+/* ==========================================================================
+   RESULTS SECTION
+   ========================================================================== */
+.results-section {
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 1rem 1.5rem 4rem;
+  flex: 1;
+}
+
+.results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding: 0.85rem 1.25rem;
+  background-color: var(--neo-secondary);
+  border: var(--neo-border-thick);
+  box-shadow: var(--neo-shadow-sm);
+}
+
+.results-count-sticker {
+  font-weight: 900;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.results-query-sticker {
+  font-weight: 700;
+  font-size: 0.95rem;
+  background: #ffffff;
+  border: 2px solid #000;
+  padding: 0.2rem 0.6rem;
+  box-shadow: 2px 2px 0px #000;
+}
+
+.results-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* ==========================================================================
+   MEDIA SPOTLIGHT (TMDB / ANILIST BANNER)
+   ========================================================================== */
+.media-spotlight {
+  position: relative;
+  background-color: var(--neo-card);
+  border: var(--neo-border-thick);
+  box-shadow: var(--neo-shadow-lg);
+  margin-bottom: 2rem;
+  overflow: hidden;
+  transform: rotate(-0.5deg);
+  transition: transform 0.2s ease;
+}
+
+.media-spotlight:hover {
+  transform: rotate(0deg);
+}
+
+.media-spotlight-tape {
+  background-color: var(--neo-secondary);
+  border-bottom: var(--neo-border-thick);
+  padding: 0.4rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+
+.media-content {
+  display: flex;
+  gap: 1.75rem;
+  padding: 1.75rem;
+  align-items: flex-start;
+  position: relative;
+}
+
+.media-poster-wrap {
+  flex-shrink: 0;
+  width: 140px;
+  border: var(--neo-border-thick);
+  box-shadow: var(--neo-shadow-md);
+  background-color: #000;
+  transform: rotate(-2deg);
+  transition: transform 0.2s ease;
+}
+
+.media-poster-wrap:hover {
+  transform: rotate(0deg) scale(1.03);
+}
+
+.media-poster {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 2/3;
+  object-fit: cover;
+  display: block;
+}
+
+.media-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.media-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
+}
+
+.neo-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border: 2px solid #000;
+  box-shadow: 2px 2px 0px #000;
+  font-size: 0.75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.pill-tmdb {
+  background-color: var(--neo-secondary);
+  color: #000;
+}
+
+.pill-anilist {
+  background-color: var(--neo-muted);
+  color: #000;
+}
+
+.pill-type {
+  background-color: #ffffff;
+  color: #000;
+}
+
+.pill-rating {
+  background-color: var(--neo-accent);
+  color: #ffffff;
+}
+
+.media-title {
+  font-size: 1.85rem;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  margin: 0 0 0.35rem;
+  line-height: 1.15;
+}
+
+.media-original-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.6);
+  margin: 0 0 0.85rem;
+}
+
+.media-genres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 1rem;
+}
+
+.genre-tag {
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.2rem 0.55rem;
+  background: #ffffff;
+  border: 2px solid #000;
+  box-shadow: 2px 2px 0px #000;
+}
+
+.media-overview {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  font-weight: 500;
+  background: var(--neo-bg);
+  border: 2px solid #000;
+  box-shadow: 3px 3px 0px #000;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1.25rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.media-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.media-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.8rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.45rem 1rem;
+  background-color: var(--neo-card);
+  color: var(--neo-ink);
+  border: 3px solid #000;
+  box-shadow: 3px 3px 0px #000;
+  text-decoration: none;
+  transition: all 0.1s ease;
+}
+
+.media-link-btn:hover {
+  background-color: var(--neo-secondary);
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0px #000;
+}
+
+.media-link-btn:active {
+  transform: translate(3px, 3px);
+  box-shadow: none;
+}
+
+/* ==========================================================================
+   TORRENT CARD
+   ========================================================================== */
+.torrent-card {
+  background-color: var(--neo-card);
+  border: var(--neo-border-thick);
+  box-shadow: var(--neo-shadow-md);
+  padding: 1.25rem;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.torrent-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--neo-shadow-lg);
+}
+
+.torrent-card-body {
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.torrent-poster-thumb {
+  width: 64px;
+  height: 96px;
+  border: 3px solid #000;
+  box-shadow: 3px 3px 0px #000;
+  overflow: hidden;
+  flex-shrink: 0;
+  background-color: #000;
+}
+
+.torrent-poster-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.torrent-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.torrent-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.torrent-meta-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.source-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border: 2px solid #000;
+  box-shadow: 2px 2px 0px #000;
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.source-badge[data-source="yts"] {
+  background-color: var(--neo-accent);
+  color: #ffffff;
+}
+
+.source-badge[data-source="1337x"],
+.source-badge[data-source="1377x"] {
+  background-color: var(--neo-secondary);
+  color: #000000;
+}
+
+.source-badge[data-source="nyaa.si"],
+.source-badge[data-source="nyaa"] {
+  background-color: var(--neo-muted);
+  color: #000000;
+}
+
+.category-badge,
+.year-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border: 2px solid #000;
+  box-shadow: 2px 2px 0px #000;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background-color: #ffffff;
+}
+
+.rating-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.55rem;
+  border: 2px solid #000;
+  box-shadow: 2px 2px 0px #000;
+  font-size: 0.72rem;
+  font-weight: 900;
+  background-color: var(--neo-secondary);
+}
+
+.torrent-date {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.torrent-name {
+  font-size: 1.15rem;
+  font-weight: 900;
+  line-height: 1.35;
+  margin: 0 0 0.85rem;
+  word-break: break-word;
+}
+
+.torrent-name a {
+  color: var(--neo-ink);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.torrent-name a:hover {
+  background-color: var(--neo-secondary);
+  box-shadow: 2px 2px 0px #000;
+}
+
+.torrent-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.stat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 900;
+  padding: 0.25rem 0.65rem;
+  border: 2px solid #000;
+  box-shadow: 2px 2px 0px #000;
+  text-transform: uppercase;
+}
+
+.stat-seeders {
+  background-color: #bbf7d0;
+  color: #14532d;
+}
+
+.stat-leechers {
+  background-color: #fecaca;
+  color: #7f1d1d;
+}
+
+.stat-size {
+  background-color: #f3f4f6;
+  color: #000000;
+}
+
+.torrent-actions {
+  display: flex;
+  gap: 0.75rem;
+  padding-top: 0.85rem;
+  border-top: 3px solid #000;
+}
+
+.magnet-button {
+  flex: 1;
+  height: 2.75rem;
+  background-color: var(--neo-accent);
+  color: #ffffff;
+  border: 3px solid #000;
+  box-shadow: 4px 4px 0px #000;
+  font-family: var(--font-family);
+  font-size: 0.95rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+
+.magnet-button:hover {
+  background-color: #ff5252;
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px #000;
+}
+
+.magnet-button:active {
+  transform: translate(3px, 3px);
+  box-shadow: none;
+}
+
+.copy-hash-button {
+  height: 2.75rem;
+  padding: 0 1.25rem;
+  background-color: #ffffff;
+  color: var(--neo-ink);
+  border: 3px solid #000;
+  box-shadow: 4px 4px 0px #000;
+  font-family: var(--font-family);
+  font-size: 0.85rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+
+.copy-hash-button:hover {
+  background-color: var(--neo-secondary);
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px #000;
+}
+
+.copy-hash-button:active {
+  transform: translate(3px, 3px);
+  box-shadow: none;
+}
+
+/* ==========================================================================
+   FEEDBACK & EMPTY STATES
+   ========================================================================== */
+.loading-box {
+  background-color: var(--neo-secondary);
+  border: var(--neo-border-thick);
+  box-shadow: var(--neo-shadow-lg);
+  padding: 3rem 2rem;
+  text-align: center;
+  transform: rotate(0.5deg);
+}
+
+.loading-title {
+  font-size: 1.5rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  margin: 1rem 0 0.5rem;
+}
+
+.loading-subtext {
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.empty-box {
+  background-color: var(--neo-card);
+  border: var(--neo-border-thick);
+  box-shadow: var(--neo-shadow-lg);
+  padding: 3rem 2rem;
+  text-align: center;
+}
+
+.empty-title {
+  font-size: 1.75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  margin: 1rem 0 0.5rem;
+}
+
+.error-banner {
+  background-color: var(--neo-accent);
+  color: #ffffff;
+  border: var(--neo-border-thick);
+  box-shadow: var(--neo-shadow-md);
+  padding: 1rem 1.5rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* ==========================================================================
+   FOOTER
+   ========================================================================== */
+.app-footer {
+  background-color: var(--neo-secondary);
+  border-top: var(--neo-border-thick);
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  margin-top: auto;
+}
+
+.footer-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.footer-main-text {
+  font-size: 1.1rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.footer-badge-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background-color: #ffffff;
+  color: var(--neo-ink);
+  border: 3px solid #000;
+  box-shadow: 3px 3px 0px #000;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: all 0.1s ease;
+}
+
+.footer-badge-link:hover {
+  background-color: var(--neo-accent);
+  color: #ffffff;
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0px #000;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .search-form {
+    flex-direction: column;
+  }
+  .search-button {
+    width: 100%;
+    justify-content: center;
+  }
+  .media-content {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .media-poster-wrap {
+    width: 160px;
+  }
+  .media-meta-row, .media-genres, .media-actions {
+    justify-content: center;
+  }
+  .torrent-card-body {
+    flex-direction: column;
+  }
 }
