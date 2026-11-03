@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useSyncExternalStore } from "react";
 import type { TorrentEntry, MediaMetadata } from "@/lib/catalog/types";
 import { CATEGORIES } from "@/lib/catalog/types";
 import TorrentCard from "@/components/TorrentCard";
+import LatestReleaseCard from "@/components/LatestReleaseCard";
 import MediaSpotlight from "@/components/MediaSpotlight";
 import {
   Search,
@@ -14,9 +15,28 @@ import {
   SearchX,
   RotateCcw,
   Code2,
+  Palette,
 } from "lucide-react";
 
 const SOURCES = ["YTS", "1377x", "Nyaa.si"] as const;
+const LATEST_RESULTS_LIMIT = 12;
+type Theme = "original" | "petal";
+const THEME_STORAGE_KEY = "torrays-theme";
+const THEME_CHANGE_EVENT = "torrays-theme-change";
+
+function readTheme(): Theme {
+  const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+  return savedTheme === "petal" ? "petal" : "original";
+}
+
+function subscribeToTheme(onStoreChange: () => void) {
+  window.addEventListener("storage", onStoreChange);
+  window.addEventListener(THEME_CHANGE_EVENT, onStoreChange);
+  return () => {
+    window.removeEventListener("storage", onStoreChange);
+    window.removeEventListener(THEME_CHANGE_EVENT, onStoreChange);
+  };
+}
 
 export default function SearchPage() {
   const [query, setQuery] = useState("");
@@ -25,6 +45,7 @@ export default function SearchPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [hasSearched, setHasSearched] = useState(false);
+  const theme = useSyncExternalStore(subscribeToTheme, readTheme, () => "original");
 
   // Filters
   const [sourceFilter, setSourceFilter] = useState("");
@@ -37,6 +58,11 @@ export default function SearchPage() {
   useEffect(() => {
     loadLatest();
   }, []);
+
+  const changeTheme = (nextTheme: Theme) => {
+    window.localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+    window.dispatchEvent(new Event(THEME_CHANGE_EVENT));
+  };
 
   const loadLatest = async () => {
     setIsLoading(true);
@@ -113,9 +139,12 @@ export default function SearchPage() {
   }, [sourceFilter, categoryFilter]);
 
   const filteredResults = results;
+  const displayedResults = hasSearched
+    ? filteredResults
+    : filteredResults.slice(0, LATEST_RESULTS_LIMIT);
 
   return (
-    <div className="app-container">
+    <div className="app-container" data-theme={theme}>
       {/* Neo-brutalist Marquee Ticker */}
       <div className="neo-marquee-wrap">
         <div className="neo-marquee-inner">
@@ -143,6 +172,28 @@ export default function SearchPage() {
           <p className="tagline">
             Open-source torrent index &middot; Search across live swarms
           </p>
+          <div className="theme-switcher" aria-label="Choose interface theme">
+            <Palette className="theme-switcher-icon" aria-hidden="true" />
+            <span className="theme-switcher-label">Theme</span>
+            <div className="theme-options" role="group" aria-label="Themes">
+              <button
+                type="button"
+                className="theme-option"
+                aria-pressed={theme === "original"}
+                onClick={() => changeTheme("original")}
+              >
+                Original
+              </button>
+              <button
+                type="button"
+                className="theme-option"
+                aria-pressed={theme === "petal"}
+                onClick={() => changeTheme("petal")}
+              >
+                Petal
+              </button>
+            </div>
+          </div>
         </div>
       </header>
 
@@ -159,7 +210,8 @@ export default function SearchPage() {
               placeholder="SEARCH MOVIES, ANIME, SHOWS..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              autoFocus
+              inputMode="search"
+              enterKeyHint="search"
             />
             {query && (
               <button
@@ -265,7 +317,9 @@ export default function SearchPage() {
             <Loader2 className="h-12 w-12 animate-spin stroke-[3px] mx-auto text-black" />
             <h3 className="loading-title">// CRAWLING LIVE TRACKERS //</h3>
             <p className="loading-subtext">
-              Querying YTS, 1377x, and Nyaa.si in real-time...
+              {hasSearched
+                ? "Querying YTS, 1377x, and Nyaa.si in real-time..."
+                : "Fetching the newest YTS releases..."}
             </p>
           </div>
         )}
@@ -274,26 +328,34 @@ export default function SearchPage() {
           <>
             {hasSearched && media && <MediaSpotlight media={media} />}
 
-            {filteredResults.length > 0 && (
+            {displayedResults.length > 0 && (
               <>
                 <div className="results-header">
                   <span className="results-count-sticker">
-                    {filteredResults.length}{" "}
-                    {filteredResults.length === 1 ? "RESULT" : "RESULTS"} FOUND
+                    {displayedResults.length}{" "}
+                    {displayedResults.length === 1 ? "RESULT" : "RESULTS"} FOUND
                   </span>
                   {hasSearched ? (
                     <span className="results-query-sticker">
                       QUERY: &ldquo;{query.toUpperCase()}&rdquo;
                     </span>
                   ) : (
-                    <span className="results-query-sticker">★ LATEST RELEASES</span>
+                    <span className="results-query-sticker">★ LATEST YTS RELEASES</span>
                   )}
                 </div>
-                <div className="results-grid">
-                  {filteredResults.map((t) => (
-                    <TorrentCard key={t.id} torrent={t} />
-                  ))}
-                </div>
+                {hasSearched ? (
+                  <div className="results-grid">
+                    {displayedResults.map((t) => (
+                      <TorrentCard key={t.id} torrent={t} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="latest-releases-grid">
+                    {displayedResults.map((t) => (
+                      <LatestReleaseCard key={t.id} torrent={t} />
+                    ))}
+                  </div>
+                )}
               </>
             )}
           </>
@@ -327,7 +389,7 @@ export default function SearchPage() {
               <span>MAGNETISSIMO CRAWLERS</span>
             </a>
             <span className="footer-badge-link">
-              <span>★ PURE NEO-BRUTALISM UI</span>
+              <span>★ ORIGINAL + PETAL THEMES</span>
             </span>
           </div>
         </div>
