@@ -16,6 +16,8 @@ import {
   RotateCcw,
   Code2,
   Palette,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 const SOURCES = ["YTS", "1377x", "Nyaa.si"] as const;
@@ -45,6 +47,7 @@ export default function SearchPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [hasSearched, setHasSearched] = useState(false);
+  const [latestPage, setLatestPage] = useState(1);
   const theme = useSyncExternalStore(subscribeToTheme, readTheme, () => "original");
 
   // Filters
@@ -68,6 +71,7 @@ export default function SearchPage() {
     setIsLoading(true);
     setError("");
     setMedia(null);
+    setLatestPage(1);
     try {
       const res = await fetch("/api/latest");
       if (!res.ok) throw new Error("Failed to fetch");
@@ -99,6 +103,7 @@ export default function SearchPage() {
       setIsLoading(true);
       setError("");
       setHasSearched(true);
+      setLatestPage(1);
 
       try {
         const params = new URLSearchParams({ q: trimmed });
@@ -139,9 +144,17 @@ export default function SearchPage() {
   }, [sourceFilter, categoryFilter]);
 
   const filteredResults = results;
+  const latestPageCount = Math.max(
+    1,
+    Math.ceil(filteredResults.length / LATEST_RESULTS_LIMIT)
+  );
+  const latestStartIndex = (latestPage - 1) * LATEST_RESULTS_LIMIT;
   const displayedResults = hasSearched
     ? filteredResults
-    : filteredResults.slice(0, LATEST_RESULTS_LIMIT);
+    : filteredResults.slice(
+        latestStartIndex,
+        latestStartIndex + LATEST_RESULTS_LIMIT
+      );
 
   return (
     <div className="app-container" data-theme={theme}>
@@ -340,7 +353,9 @@ export default function SearchPage() {
                       QUERY: &ldquo;{query.toUpperCase()}&rdquo;
                     </span>
                   ) : (
-                    <span className="results-query-sticker">★ LATEST YTS RELEASES</span>
+                    <span className="results-query-sticker">
+                      ★ LATEST YTS · PAGE {latestPage}/{latestPageCount}
+                    </span>
                   )}
                 </div>
                 {hasSearched ? (
@@ -355,6 +370,29 @@ export default function SearchPage() {
                       <LatestReleaseCard key={t.id} torrent={t} />
                     ))}
                   </div>
+                )}
+                {!hasSearched && latestPageCount > 1 && (
+                  <nav className="latest-pagination" aria-label="Latest release pages">
+                    <button
+                      type="button"
+                      className="latest-page-button"
+                      onClick={() => setLatestPage((page) => page - 1)}
+                      disabled={latestPage === 1}
+                    >
+                      <ChevronLeft aria-hidden="true" /> Previous
+                    </button>
+                    <span className="latest-page-status" aria-live="polite">
+                      Page {latestPage} of {latestPageCount}
+                    </span>
+                    <button
+                      type="button"
+                      className="latest-page-button"
+                      onClick={() => setLatestPage((page) => page + 1)}
+                      disabled={latestPage === latestPageCount}
+                    >
+                      Next <ChevronRight aria-hidden="true" />
+                    </button>
+                  </nav>
                 )}
               </>
             )}

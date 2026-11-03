@@ -1,15 +1,23 @@
 "use client";
 
+import { useState } from "react";
 import { formatBytes } from "@/lib/crawlers/utils";
 import type { TorrentEntry } from "@/lib/catalog/types";
-import { ArrowDown, ArrowUp, ExternalLink, HardDrive, Magnet, Star } from "lucide-react";
+import { ArrowDown, ArrowUp, Check, Copy, ExternalLink, HardDrive, Magnet, Star } from "lucide-react";
 
 interface LatestReleaseCardProps {
   torrent: TorrentEntry;
 }
 
 export default function LatestReleaseCard({ torrent }: LatestReleaseCardProps) {
+  const [copied, setCopied] = useState(false);
   const magnetLink = `magnet:${torrent.magnetUrl}`;
+
+  const copyHash = () => {
+    navigator.clipboard.writeText(torrent.magnetHash);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <article className="latest-release-card">
@@ -26,6 +34,11 @@ export default function LatestReleaseCard({ torrent }: LatestReleaseCardProps) {
             {torrent.name}<ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
           </a>
         </h3>
+        <div className="latest-release-mobile-stats" aria-label="Torrent statistics">
+          <span className="latest-mobile-stat latest-mobile-seeders"><ArrowUp aria-hidden="true" />{torrent.seeders} seeds</span>
+          <span className="latest-mobile-stat latest-mobile-peers"><ArrowDown aria-hidden="true" />{torrent.leechers} peers</span>
+          <span className="latest-mobile-stat latest-mobile-size"><HardDrive aria-hidden="true" />{formatBytes(torrent.sizeInBytes)}</span>
+        </div>
       </div>
 
       <div className="latest-release-poster">
@@ -42,6 +55,12 @@ export default function LatestReleaseCard({ torrent }: LatestReleaseCardProps) {
           </div>
           <a href={magnetLink} className="latest-release-magnet"><Magnet aria-hidden="true" /> Magnet download</a>
         </div>
+      </div>
+      <div className="latest-release-mobile-actions">
+        <a href={magnetLink} className="latest-mobile-magnet"><Magnet aria-hidden="true" /> Magnet</a>
+        <button type="button" className="latest-mobile-copy" onClick={copyHash}>
+          {copied ? <><Check aria-hidden="true" /> Copied</> : <><Copy aria-hidden="true" /> Hash</>}
+        </button>
       </div>
     </article>
   );
