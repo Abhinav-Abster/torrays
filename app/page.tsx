@@ -1,26 +1,26 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect, useSyncExternalStore } from "react";
-import type { TorrentEntry, MediaMetadata } from "@/lib/catalog/types";
-import { CATEGORIES } from "@/lib/catalog/types";
-import TorrentCard from "@/components/TorrentCard";
 import LatestReleaseCard from "@/components/LatestReleaseCard";
 import MediaSpotlight from "@/components/MediaSpotlight";
+import TorrentCard from "@/components/TorrentCard";
+import type { MediaMetadata, TorrentEntry } from "@/lib/catalog/types";
+import { CATEGORIES } from "@/lib/catalog/types";
 import {
-  Search,
-  Zap,
-  Filter,
-  Sparkles,
-  Loader2,
-  SearchX,
-  RotateCcw,
-  Code2,
-  Palette,
-  ChevronLeft,
-  ChevronRight,
+    ChevronLeft,
+    ChevronRight,
+    Code2,
+    Filter,
+    Loader2,
+    Palette,
+    RotateCcw,
+    Search,
+    SearchX,
+    Sparkles,
+    Zap,
 } from "lucide-react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 
-const SOURCES = ["YTS", "1377x", "Nyaa.si"] as const;
+const SOURCES = ["YTS", "1337x", "Nyaa.si"] as const;
 const LATEST_RESULTS_LIMIT = 12;
 type Theme = "original" | "petal";
 const THEME_STORAGE_KEY = "torrays-theme";
@@ -162,11 +162,11 @@ export default function SearchPage() {
       <div className="neo-marquee-wrap">
         <div className="neo-marquee-inner">
           <span>★ TORRAYS // THE OPEN-SOURCE TORRENT AGGREGATOR</span>
-          <span>★ LIVE DISTRIBUTED CRAWLING: YTS • 1377X • NYAA</span>
+          <span>★ LIVE DISTRIBUTED CRAWLING: YTS • 1337x • NYAA</span>
           <span>★ HIGH-SATURATION MEDIA DISCOVERY</span>
           <span>★ POWERED BY TMDB & ANILIST METADATA</span>
           <span>★ TORRAYS // THE OPEN-SOURCE TORRENT AGGREGATOR</span>
-          <span>★ LIVE DISTRIBUTED CRAWLING: YTS • 1377X • NYAA</span>
+          <span>★ LIVE DISTRIBUTED CRAWLING: YTS • 1337x • NYAA</span>
           <span>★ HIGH-SATURATION MEDIA DISCOVERY</span>
           <span>★ POWERED BY TMDB & ANILIST METADATA</span>
         </div>
@@ -273,7 +273,7 @@ export default function SearchPage() {
               value={sourceFilter}
               onChange={(e) => setSourceFilter(e.target.value)}
             >
-              <option value="">ALL SOURCES (YTS, 1377X, NYAA)</option>
+              <option value="">ALL SOURCES (YTS, 1337x, NYAA)</option>
               {SOURCES.map((s) => (
                 <option key={s} value={s}>
                   {s}
@@ -314,6 +314,7 @@ export default function SearchPage() {
             </button>
           )}
         </div>
+
       </section>
 
       {/* Results */}
@@ -331,7 +332,7 @@ export default function SearchPage() {
             <h3 className="loading-title">// CRAWLING LIVE TRACKERS //</h3>
             <p className="loading-subtext">
               {hasSearched
-                ? "Querying YTS, 1377x, and Nyaa.si in real-time..."
+                ? "Querying YTS, 1337x, and Nyaa.si in real-time..."
                 : "Fetching the newest YTS releases..."}
             </p>
           </div>

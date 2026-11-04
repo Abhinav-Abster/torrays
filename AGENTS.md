@@ -11,12 +11,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 # AGENTS.md
 
 ## Project overview
-An open-source torrent index — a clean, ad-free browse/search UI for downloading
-Linux distros and other open-source/public-domain content via BitTorrent.
-This is NOT a general torrent index; only curated, legally-distributable content
-(official Linux distro ISOs, Archive.org CC-licensed torrents, open-source
-software bundles) belongs in the catalog. Never add scraped/unverified entries
-from third-party or copyrighted-content trackers.
+
 
 ## Stack
 - Next.js (App Router) + TypeScript + Tailwind CSS

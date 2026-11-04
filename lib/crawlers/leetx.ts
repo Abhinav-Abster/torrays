@@ -1,17 +1,17 @@
 /**
- * 1377x crawler — ported from magnetissimo/lib/magnetissimo/crawlers/leetx.ex
+ * 1337x crawler — ported from magnetissimo/lib/magnetissimo/crawlers/leetx.ex
  *
  * Scrapes search results table, then follows detail pages for magnets & metadata.
- * Uses 1377x.to with automatic mirror fallback (e.g. 1337x.torrentbay.to) to ensure
+ * Uses 1337x.to with automatic mirror fallback (e.g. 1337x.torrentbay.to) to ensure
  * reliable access across different networks and DNS configurations.
  */
-import * as cheerio from "cheerio";
 import type { TorrentEntry } from "@/lib/catalog/types";
-import { slugify, sizeToBytes, fetchWithTimeout } from "./utils";
+import * as cheerio from "cheerio";
+import { fetchWithTimeout, sizeToBytes, slugify } from "./utils";
 
 const CANDIDATE_BASES = [
-  "https://1377x.to",
-  "https://www.1377x.to",
+  "https://1337x.to",
+  "https://www.1337x.to",
   "https://1337x.torrentbay.to",
   "https://www.1337x.to",
   "https://1337x.to",
@@ -39,7 +39,7 @@ async function fetchSearchPage(
 }
 
 /**
- * Search 1377x/1337x for the given query (first page only for speed).
+ * Search 1337x/1337x for the given query (first page only for speed).
  */
 export async function searchLeetx(query: string): Promise<TorrentEntry[]> {
   try {
@@ -61,7 +61,7 @@ export async function searchLeetx(query: string): Promise<TorrentEntry[]> {
       )
       .map((r) => r.value!);
   } catch (err) {
-    console.error("[1377x] Search failed:", err);
+    console.error("[1337x] Search failed:", err);
     return [];
   }
 }
@@ -90,7 +90,7 @@ async function parseTorrentPage(url: string): Promise<TorrentEntry | null> {
 
     const name = $("title")
       .text()
-      .replace(/ Torrent \| (1337x|1377x)$/i, "")
+      .replace(/ Torrent \| (1337x|1337x)$/i, "")
       .replace(/^Download /i, "")
       .trim();
 
@@ -146,10 +146,10 @@ async function parseTorrentPage(url: string): Promise<TorrentEntry | null> {
       seeders,
       sizeInBytes: sizeToBytes(sizeText),
       category: mapCategory(categoryText),
-      source: "1377x",
+      source: "1337x",
     };
   } catch (err) {
-    console.error(`[1377x] Failed to parse ${url}:`, err);
+    console.error(`[1337x] Failed to parse ${url}:`, err);
     return null;
   }
 }

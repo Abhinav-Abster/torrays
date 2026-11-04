@@ -17,9 +17,6 @@ that file is the source of truth and applies here too.
 - UI work should default to the frontend-design conventions already in use
   (warm, intentional, Material You Expressive–inspired) rather than generic
   Tailwind defaults — ask before introducing a new visual direction.
-- Never add non-free/copyrighted content sources, even as a placeholder or
-  "for testing" — this is a hard boundary for the project, not a style
-  preference.
 
 ## Useful context
 - Catalog schema lives in `lib/catalog/types.ts` — always check it before

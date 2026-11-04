@@ -890,7 +890,7 @@ select:focus-visible {
 }
 
 .source-badge[data-source="1337x"],
-.source-badge[data-source="1377x"] {
+.source-badge[data-source="1337x"] {
   background-color: var(--neo-secondary);
   color: #000000;
 }
@@ -1340,7 +1340,7 @@ select:focus-visible {
 .app-container[data-theme="petal"] .torrent-poster-thumb { border: 0; border-radius: 1rem 1rem 1rem 0.35rem; box-shadow: none; }
 .app-container[data-theme="petal"] .source-badge, .app-container[data-theme="petal"] .category-badge, .app-container[data-theme="petal"] .year-badge, .app-container[data-theme="petal"] .rating-badge, .app-container[data-theme="petal"] .stat-pill { border: 0; border-radius: 1rem; box-shadow: none; font-weight: 700; letter-spacing: 0.02em; text-transform: none; }
 .app-container[data-theme="petal"] .source-badge[data-source="yts"] { background: #f5dce8; color: #873759; }
-.app-container[data-theme="petal"] .source-badge[data-source="1337x"], .app-container[data-theme="petal"] .source-badge[data-source="1377x"] { background: #f9edc9; color: #7d5d14; }
+.app-container[data-theme="petal"] .source-badge[data-source="1337x"], .app-container[data-theme="petal"] .source-badge[data-source="1337x"] { background: #f9edc9; color: #7d5d14; }
 .app-container[data-theme="petal"] .source-badge[data-source="nyaa.si"], .app-container[data-theme="petal"] .source-badge[data-source="nyaa"] { background: #e7def8; color: #5f4b83; }
 .app-container[data-theme="petal"] .category-badge, .app-container[data-theme="petal"] .year-badge { background: #f3eff3; color: #665b65; }
 .app-container[data-theme="petal"] .rating-badge { background: #fdebc3; color: #745610; }

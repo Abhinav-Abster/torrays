@@ -4,9 +4,9 @@
  * Searches all crawlers concurrently and returns filtered results.
  * Mirrors magnetissimo's /api/search/:search_term endpoint.
  */
-import { NextRequest, NextResponse } from "next/server";
 import { searchAll } from "@/lib/crawlers";
 import { getMediaMetadata } from "@/lib/metadata";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
@@ -35,8 +35,8 @@ export async function GET(request: NextRequest) {
       results = results.filter((t) => {
         const s = t.source.toLowerCase();
         if (
-          (sf === "1337x" || sf === "1377x") &&
-          (s === "1337x" || s === "1377x")
+          (sf === "1337x" || sf === "1337x") &&
+          (s === "1337x" || s === "1337x")
         ) {
           return true;
         }
