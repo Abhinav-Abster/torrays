@@ -5,8 +5,8 @@
  */
 import type { TorrentEntry } from "@/lib/catalog/types";
 import { searchYts, latestYts } from "./yts";
-import { searchLeetx } from "./leetx";
-import { searchNyaa } from "./nyaa";
+import { searchPirateBay, latestPirateBay } from "./piratebay";
+import { searchNyaa, latestNyaa } from "./nyaa";
 import { searchDemo } from "./demo";
 
 /**
@@ -17,7 +17,7 @@ import { searchDemo } from "./demo";
 export async function searchAll(query: string): Promise<TorrentEntry[]> {
   const results = await Promise.allSettled([
     searchYts(query),
-    searchLeetx(query),
+    searchPirateBay(query),
     searchNyaa(query),
   ]);
 
@@ -35,13 +35,27 @@ export async function searchAll(query: string): Promise<TorrentEntry[]> {
 }
 
 /**
- * Fetch the homepage's latest releases.
- *
- * Keep this feed intentionally limited to YTS. Search still queries every
- * configured crawler; the restriction only applies to the homepage grid.
+ * Fetch the homepage latest releases — intentionally limited to YTS movie releases.
+ */
+export async function latestHome(): Promise<TorrentEntry[]> {
+  return deduplicateAndSort(await latestYts());
+}
+
+/**
+ * Fetch latest releases from all available providers concurrently for the browse page.
  */
 export async function latestAll(): Promise<TorrentEntry[]> {
-  return deduplicateAndSort(await latestYts());
+  const settled = await Promise.allSettled([
+    latestYts(),
+    latestPirateBay(),
+    latestNyaa(),
+  ]);
+
+  const allEntries = settled.flatMap((r) =>
+    r.status === "fulfilled" ? r.value : []
+  );
+
+  return deduplicateAndSort(allEntries);
 }
 
 function deduplicateAndSort(entries: TorrentEntry[]): TorrentEntry[] {

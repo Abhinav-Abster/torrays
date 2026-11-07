@@ -107,6 +107,11 @@ function parseSearchPage(html: string, base: string): TorrentEntry[] {
       }
     }
 
+    const category = mapNyaaCategory(categoryTitle);
+    const isNsfw = /\b(xxx|porn|hentai|jav|nsfw|erotica|adult|18\+)\b/i.test(
+      name + " " + categoryTitle
+    );
+
     results.push({
       id: magnetHash,
       name,
@@ -119,8 +124,9 @@ function parseSearchPage(html: string, base: string): TorrentEntry[] {
       leechers,
       seeders,
       sizeInBytes: sizeToBytes(sizeText),
-      category: mapNyaaCategory(categoryTitle),
+      category,
       source: "Nyaa.si",
+      isNsfw,
     });
   });
 

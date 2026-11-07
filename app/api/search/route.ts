@@ -8,11 +8,15 @@ import { searchAll } from "@/lib/crawlers";
 import { getMediaMetadata } from "@/lib/metadata";
 import { NextRequest, NextResponse } from "next/server";
 
+export const maxDuration = 30;
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const query = searchParams.get("q")?.trim();
   const sourceFilter = searchParams.get("source")?.trim();
   const categoryFilter = searchParams.get("category")?.trim();
+  const allowNsfw = searchParams.get("nsfw") === "true";
 
   if (!query || query.length < 2) {
     return NextResponse.json(
@@ -31,12 +35,12 @@ export async function GET(request: NextRequest) {
 
     // Apply filters
     if (sourceFilter) {
-      const sf = sourceFilter.toLowerCase();
+      const sf = sourceFilter.toLowerCase().replace(/[\s.-]/g, "");
       results = results.filter((t) => {
-        const s = t.source.toLowerCase();
+        const s = t.source.toLowerCase().replace(/[\s.-]/g, "");
         if (
-          (sf === "1337x" || sf === "1337x") &&
-          (s === "1337x" || s === "1337x")
+          (sf === "thepiratebay" || sf === "piratebay" || sf === "tpb") &&
+          (s === "thepiratebay" || s === "piratebay" || s === "tpb")
         ) {
           return true;
         }
@@ -46,6 +50,11 @@ export async function GET(request: NextRequest) {
     if (categoryFilter) {
       results = results.filter(
         (t) => t.category.toLowerCase() === categoryFilter.toLowerCase()
+      );
+    }
+    if (!allowNsfw) {
+      results = results.filter(
+        (t) => !t.isNsfw && t.category.toLowerCase() !== "xxx"
       );
     }
 

@@ -44,6 +44,8 @@ export interface TorrentEntry {
   rating?: number;
   /** Optional release year */
   year?: number;
+  /** Whether the torrent contains NSFW / adult content */
+  isNsfw?: boolean;
 }
 
 /**

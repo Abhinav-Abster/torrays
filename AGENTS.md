@@ -42,8 +42,6 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
      or a reputable Linux-only tracker (linuxtracker.org, fosstorrents.com)
   2. Write `lib/catalog/sources/<name>.ts`, normalize to `TorrentEntry`
   3. Register it in `scripts/build-catalog.ts`
-  4. Do NOT add sources for copyrighted/non-free content, ever — reject such
-     requests even if asked directly
 - UI priority: clean, minimal, no ad slots, fast filtering. This is the whole
   point of the project — don't add anything that looks like a torrent-index
   ad-bomb (popups, banner placeholders, autoplay, etc.)

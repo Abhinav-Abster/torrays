@@ -4,12 +4,27 @@
  * Returns the latest torrents from all sources.
  * Mirrors magnetissimo's /api/latest endpoint.
  */
-import { NextResponse } from "next/server";
-import { latestAll } from "@/lib/crawlers";
+import { NextRequest, NextResponse } from "next/server";
+import { latestAll, latestHome } from "@/lib/crawlers";
 
-export async function GET() {
+export const maxDuration = 30;
+export const dynamic = "force-dynamic";
+
+export async function GET(request: NextRequest) {
+  const { searchParams } = request.nextUrl;
+  const isAll =
+    searchParams.get("all") === "true" ||
+    searchParams.get("source") === "all";
+  const allowNsfw = searchParams.get("nsfw") === "true";
+
   try {
-    const results = await latestAll();
+    let results = isAll ? await latestAll() : await latestHome();
+
+    if (!allowNsfw) {
+      results = results.filter(
+        (t) => !t.isNsfw && t.category.toLowerCase() !== "xxx"
+      );
+    }
 
     return NextResponse.json({
       count: results.length,

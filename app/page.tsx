@@ -5,10 +5,13 @@ import MediaSpotlight from "@/components/MediaSpotlight";
 import TorrentCard from "@/components/TorrentCard";
 import type { MediaMetadata, TorrentEntry } from "@/lib/catalog/types";
 import { CATEGORIES } from "@/lib/catalog/types";
+import { useNsfw, useTheme } from "@/lib/settings";
 import {
+    ChevronDown,
     ChevronLeft,
     ChevronRight,
     Code2,
+    Compass,
     Filter,
     Loader2,
     Palette,
@@ -18,27 +21,11 @@ import {
     Sparkles,
     Zap,
 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import Link from "next/link";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-const SOURCES = ["YTS", "1337x", "Nyaa.si"] as const;
+const SOURCES = ["YTS", "ThePirateBay", "Nyaa.si"] as const;
 const LATEST_RESULTS_LIMIT = 12;
-type Theme = "original" | "petal";
-const THEME_STORAGE_KEY = "torrays-theme";
-const THEME_CHANGE_EVENT = "torrays-theme-change";
-
-function readTheme(): Theme {
-  const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
-  return savedTheme === "petal" ? "petal" : "original";
-}
-
-function subscribeToTheme(onStoreChange: () => void) {
-  window.addEventListener("storage", onStoreChange);
-  window.addEventListener(THEME_CHANGE_EVENT, onStoreChange);
-  return () => {
-    window.removeEventListener("storage", onStoreChange);
-    window.removeEventListener(THEME_CHANGE_EVENT, onStoreChange);
-  };
-}
 
 export default function SearchPage() {
   const [query, setQuery] = useState("");
@@ -48,7 +35,8 @@ export default function SearchPage() {
   const [error, setError] = useState("");
   const [hasSearched, setHasSearched] = useState(false);
   const [latestPage, setLatestPage] = useState(1);
-  const theme = useSyncExternalStore(subscribeToTheme, readTheme, () => "original");
+  const [theme, setTheme] = useTheme();
+  const [nsfw, toggleNsfw] = useNsfw();
 
   // Filters
   const [sourceFilter, setSourceFilter] = useState("");
@@ -57,23 +45,20 @@ export default function SearchPage() {
   // For debounced search
   const abortRef = useRef<AbortController | null>(null);
 
-  // Load latest on mount
+  // Load latest YTS releases on mount and when NSFW changes
   useEffect(() => {
-    loadLatest();
-  }, []);
+    if (!hasSearched) {
+      loadLatest(nsfw);
+    }
+  }, [nsfw]);
 
-  const changeTheme = (nextTheme: Theme) => {
-    window.localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
-    window.dispatchEvent(new Event(THEME_CHANGE_EVENT));
-  };
-
-  const loadLatest = async () => {
+  const loadLatest = async (allowNsfw: boolean = nsfw) => {
     setIsLoading(true);
     setError("");
     setMedia(null);
     setLatestPage(1);
     try {
-      const res = await fetch("/api/latest");
+      const res = await fetch(`/api/latest?nsfw=${allowNsfw}`);
       if (!res.ok) throw new Error("Failed to fetch");
       const data = await res.json();
       setResults(data.results ?? []);
@@ -109,6 +94,7 @@ export default function SearchPage() {
         const params = new URLSearchParams({ q: trimmed });
         if (sourceFilter) params.set("source", sourceFilter);
         if (categoryFilter) params.set("category", categoryFilter);
+        if (nsfw) params.set("nsfw", "true");
 
         const res = await fetch(`/api/search?${params}`, {
           signal: controller.signal,
@@ -133,7 +119,7 @@ export default function SearchPage() {
         setIsLoading(false);
       }
     },
-    [query, sourceFilter, categoryFilter]
+    [query, sourceFilter, categoryFilter, nsfw]
   );
 
   // Re-search when filters change (if we've already searched)
@@ -141,9 +127,29 @@ export default function SearchPage() {
     if (hasSearched && query.trim().length >= 2) {
       handleSearch();
     }
-  }, [sourceFilter, categoryFilter]);
+  }, [sourceFilter, categoryFilter, nsfw]);
 
-  const filteredResults = results;
+  const filteredResults = results.filter((t) => {
+    if (!nsfw && (t.isNsfw || t.category.toLowerCase() === "xxx")) {
+      return false;
+    }
+    if (sourceFilter) {
+      const sf = sourceFilter.toLowerCase().replace(/[\s.-]/g, "");
+      const s = t.source.toLowerCase().replace(/[\s.-]/g, "");
+      if (
+        (sf === "thepiratebay" || sf === "piratebay" || sf === "tpb") &&
+        (s === "thepiratebay" || s === "piratebay" || s === "tpb")
+      ) {
+        return true;
+      }
+      if (s !== sf) return false;
+    }
+    if (categoryFilter) {
+      if (t.category.toLowerCase() !== categoryFilter.toLowerCase()) return false;
+    }
+    return true;
+  });
+
   const latestPageCount = Math.max(
     1,
     Math.ceil(filteredResults.length / LATEST_RESULTS_LIMIT)
@@ -162,11 +168,11 @@ export default function SearchPage() {
       <div className="neo-marquee-wrap">
         <div className="neo-marquee-inner">
           <span>★ TORRAYS // THE OPEN-SOURCE TORRENT AGGREGATOR</span>
-          <span>★ LIVE DISTRIBUTED CRAWLING: YTS • 1337x • NYAA</span>
+          <span>★ LIVE DISTRIBUTED CRAWLING: YTS • THEPIRATEBAY • NYAA</span>
           <span>★ HIGH-SATURATION MEDIA DISCOVERY</span>
           <span>★ POWERED BY TMDB & ANILIST METADATA</span>
           <span>★ TORRAYS // THE OPEN-SOURCE TORRENT AGGREGATOR</span>
-          <span>★ LIVE DISTRIBUTED CRAWLING: YTS • 1337x • NYAA</span>
+          <span>★ LIVE DISTRIBUTED CRAWLING: YTS • THEPIRATEBAY • NYAA</span>
           <span>★ HIGH-SATURATION MEDIA DISCOVERY</span>
           <span>★ POWERED BY TMDB & ANILIST METADATA</span>
         </div>
@@ -177,7 +183,19 @@ export default function SearchPage() {
         <div className="header-inner">
           <div className="brand-sticker-group">
             <div className="brand-badge">
-              <Zap className="h-8 w-8 stroke-[3px] text-black fill-neo-accent" />
+              <Zap className="brand-icon-neo h-8 w-8 stroke-[3px] text-black fill-neo-accent" />
+              <svg className="brand-mark-petal" viewBox="0 0 512 512" fill="none" aria-hidden="true">
+                <defs>
+                  <clipPath id="headerSwirlClip">
+                    <path d="M220.6,291.4 C234.0,256.2 230.3,200.8 262.6,171.7 C286.7,150.6 332.5,160.8 362.1,149.9 C351.2,179.5 361.4,225.3 340.3,249.4 C311.2,281.7 255.8,278.0 220.6,291.4 Z M291.4,220.6 C278.0,255.8 281.7,311.2 249.4,340.3 C225.3,361.4 179.5,351.2 149.9,362.1 C160.8,332.5 150.6,286.7 171.7,262.6 C200.8,230.3 256.2,234.0 291.4,220.6 Z" />
+                  </clipPath>
+                </defs>
+                <path fill="#026065" d="M220.6,291.4 C234.0,256.2 230.3,200.8 262.6,171.7 C286.7,150.6 332.5,160.8 362.1,149.9 C351.2,179.5 361.4,225.3 340.3,249.4 C311.2,281.7 255.8,278.0 220.6,291.4 Z M291.4,220.6 C278.0,255.8 281.7,311.2 249.4,340.3 C225.3,361.4 179.5,351.2 149.9,362.1 C160.8,332.5 150.6,286.7 171.7,262.6 C200.8,230.3 256.2,234.0 291.4,220.6 Z" />
+                <path fill="#A04106" d="M291.4,291.4 C256.2,278.0 200.8,281.7 171.7,249.4 C150.6,225.3 160.8,179.5 149.9,149.9 C179.5,160.8 225.3,150.6 249.4,171.7 C281.7,200.8 278.0,256.2 291.4,291.4 Z M220.6,220.6 C255.8,234.0 311.2,230.3 340.3,262.6 C361.4,286.7 351.2,332.5 362.1,362.1 C332.5,351.2 286.7,361.4 262.6,340.3 C230.3,311.2 234.0,255.8 220.6,220.6 Z" />
+                <g clipPath="url(#headerSwirlClip)">
+                  <path fill="#E45B24" d="M291.4,291.4 C256.2,278.0 200.8,281.7 171.7,249.4 C150.6,225.3 160.8,179.5 149.9,149.9 C179.5,160.8 225.3,150.6 249.4,171.7 C281.7,200.8 278.0,256.2 291.4,291.4 Z M220.6,220.6 C255.8,234.0 311.2,230.3 340.3,262.6 C361.4,286.7 351.2,332.5 362.1,362.1 C332.5,351.2 286.7,361.4 262.6,340.3 C230.3,311.2 234.0,255.8 220.6,220.6 Z" />
+                </g>
+              </svg>
               <h1 className="logo-text">Torrays</h1>
             </div>
             <span className="sub-tag-sticker">AGGREGATOR v2.0</span>
@@ -185,26 +203,45 @@ export default function SearchPage() {
           <p className="tagline">
             Open-source torrent index &middot; Search across live swarms
           </p>
-          <div className="theme-switcher" aria-label="Choose interface theme">
-            <Palette className="theme-switcher-icon" aria-hidden="true" />
-            <span className="theme-switcher-label">Theme</span>
-            <div className="theme-options" role="group" aria-label="Themes">
+          <div className="header-controls">
+            <div
+              className="nsfw-toggle-group"
+              title="Toggle adult / NSFW content (disabled by default)"
+            >
+              <span className="nsfw-toggle-label">18+ NSFW</span>
               <button
                 type="button"
-                className="theme-option"
-                aria-pressed={theme === "original"}
-                onClick={() => changeTheme("original")}
+                role="switch"
+                aria-checked={nsfw}
+                className={`nsfw-toggle-btn ${nsfw ? "is-active" : ""}`}
+                onClick={toggleNsfw}
               >
-                Original
+                <span className="nsfw-toggle-thumb" />
+                <span className="nsfw-toggle-text">{nsfw ? "ON" : "OFF"}</span>
               </button>
-              <button
-                type="button"
-                className="theme-option"
-                aria-pressed={theme === "petal"}
-                onClick={() => changeTheme("petal")}
-              >
-                Petal
-              </button>
+            </div>
+
+            <div className="theme-switcher" aria-label="Choose interface theme">
+              <Palette className="theme-switcher-icon" aria-hidden="true" />
+              <span className="theme-switcher-label">Theme</span>
+              <div className="theme-options" role="group" aria-label="Themes">
+                <button
+                  type="button"
+                  className="theme-option"
+                  aria-pressed={theme === "original"}
+                  onClick={() => setTheme("original")}
+                >
+                  Original
+                </button>
+                <button
+                  type="button"
+                  className="theme-option"
+                  aria-pressed={theme === "petal"}
+                  onClick={() => setTheme("petal")}
+                >
+                  Petal
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -220,7 +257,7 @@ export default function SearchPage() {
             <input
               type="text"
               className="search-input"
-              placeholder="SEARCH MOVIES, ANIME, SHOWS..."
+              placeholder="SEARCH MOVIES, ANIME, SHOWS, SOFTWARE..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               inputMode="search"
@@ -236,68 +273,84 @@ export default function SearchPage() {
                   setResults([]);
                   setMedia(null);
                   setHasSearched(false);
-                  loadLatest();
+                  loadLatest(nsfw);
                 }}
               >
                 ✕
               </button>
             )}
           </div>
-          <button
-            type="submit"
-            className="search-button"
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="h-5 w-5 animate-spin stroke-[3px]" />
-                <span>SCRAPING...</span>
-              </>
-            ) : (
-              <>
-                <Zap className="h-5 w-5 stroke-[3px] fill-current" />
-                <span>SEARCH</span>
-              </>
-            )}
-          </button>
+          <div className="search-actions">
+            <button
+              type="submit"
+              className="search-button"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin stroke-[3px]" />
+                  <span>SCRAPING...</span>
+                </>
+              ) : (
+                <>
+                  <Zap className="h-5 w-5 stroke-[3px] fill-current" />
+                  <span>SEARCH</span>
+                </>
+              )}
+            </button>
+            <Link
+              href="/browse"
+              className="browse-button"
+              title="Browse latest releases from all providers in list view"
+            >
+              <Compass className="h-5 w-5 stroke-[3px]" />
+              <span>BROWSE ALL</span>
+            </Link>
+          </div>
         </form>
 
         {/* Filters */}
         <div className="filters-row">
           <div className="filter-group">
             <label>
-              <Filter className="h-3.5 w-3.5 stroke-[3px]" /> Source Swarm
+              <Filter className="h-3.5 w-3.5 stroke-[3px]" /> Provider Swarm
             </label>
-            <select
-              className="neo-select"
-              value={sourceFilter}
-              onChange={(e) => setSourceFilter(e.target.value)}
-            >
-              <option value="">ALL SOURCES (YTS, 1337x, NYAA)</option>
-              {SOURCES.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
+            <div className="select-wrapper">
+              <select
+                className="neo-select"
+                value={sourceFilter}
+                onChange={(e) => setSourceFilter(e.target.value)}
+              >
+                <option value="">ALL PROVIDERS (YTS, THEPIRATEBAY, NYAA)</option>
+                {SOURCES.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="select-chevron" aria-hidden="true" />
+            </div>
           </div>
 
           <div className="filter-group">
             <label>
               <Sparkles className="h-3.5 w-3.5 stroke-[3px]" /> Category
             </label>
-            <select
-              className="neo-select"
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-            >
-              <option value="">ALL CATEGORIES</option>
-              {CATEGORIES.map((c) => (
-                <option key={c} value={c}>
-                  {c.toUpperCase()}
-                </option>
-              ))}
-            </select>
+            <div className="select-wrapper">
+              <select
+                className="neo-select"
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+              >
+                <option value="">ALL CATEGORIES</option>
+                {CATEGORIES.map((c) => (
+                  <option key={c} value={c}>
+                    {c.toUpperCase()}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="select-chevron" aria-hidden="true" />
+            </div>
           </div>
 
           {(sourceFilter || categoryFilter) && (
@@ -314,7 +367,6 @@ export default function SearchPage() {
             </button>
           )}
         </div>
-
       </section>
 
       {/* Results */}
@@ -332,7 +384,7 @@ export default function SearchPage() {
             <h3 className="loading-title">// CRAWLING LIVE TRACKERS //</h3>
             <p className="loading-subtext">
               {hasSearched
-                ? "Querying YTS, 1337x, and Nyaa.si in real-time..."
+                ? "Querying YTS, ThePirateBay, and Nyaa.si in real-time..."
                 : "Fetching the newest YTS releases..."}
             </p>
           </div>
@@ -355,10 +407,12 @@ export default function SearchPage() {
                     </span>
                   ) : (
                     <span className="results-query-sticker">
-                      ★ LATEST YTS · PAGE {latestPage}/{latestPageCount}
+                      ★ LATEST YTS MOVIES · PAGE {latestPage}/{latestPageCount}
                     </span>
                   )}
                 </div>
+
+                {/* Home page: Search shows card list; Default shows YTS posters */}
                 {hasSearched ? (
                   <div className="results-grid">
                     {displayedResults.map((t) => (
@@ -372,6 +426,7 @@ export default function SearchPage() {
                     ))}
                   </div>
                 )}
+
                 {!hasSearched && latestPageCount > 1 && (
                   <nav className="latest-pagination" aria-label="Latest release pages">
                     <button
@@ -436,4 +491,3 @@ export default function SearchPage() {
     </div>
   );
 }
-
