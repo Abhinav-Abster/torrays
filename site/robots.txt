@@ -1,5 +1,0 @@
-User-agent: *
-Allow: /
-
-# Sitemap
-Sitemap: https://my-petal-browser.vercel.app/sitemap.xml
